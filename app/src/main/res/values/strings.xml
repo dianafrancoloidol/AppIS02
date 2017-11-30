@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">AppIS02</string>
+    <string name="prof_pic">Perfil</string>
+    <string name="name">Mostrar nombre aquí</string>
+    <string name="email">Mostrar email aquí</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login cuenta Google</string>
+
+    <string name="cedula">C.I.N°</string>
+    <string name="nombre">Nombre</string>
+    <string name="apellido">Apellido</string>
+    <string name="fecnac">F. Nacimiento</string>
+    <string name="sexo">Sexo</string>
+    <string name="alergia">Alergia</string>
+    <string name="hijosTitulo">Lista de Hijos</string>
 </resources>
