@@ -284,6 +284,7 @@ public class HijosActivity extends AppCompatActivity implements View.OnClickList
                 manager.cancelAll();
                 manager.notify(0, builder.build());
 
+                
             }
 
         }
