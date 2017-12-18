@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".HijosActivity"></activity>
+        <activity android:name=".VacunasActivity"></activity>
     </application>
 
 </manifest>

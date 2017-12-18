@@ -6,6 +6,7 @@
     <string name="logout">Logout</string>
     <string name="login">Login cuenta Google</string>
 
+    <string name="idHijo">ID</string>
     <string name="cedula">C.I.N°</string>
     <string name="nombre">Nombre</string>
     <string name="apellido">Apellido</string>
@@ -13,4 +14,11 @@
     <string name="sexo">Sexo</string>
     <string name="alergia">Alergia</string>
     <string name="hijosTitulo">Lista de Hijos</string>
+    <string name="vacunasTitulo">Lista de Vacunas</string>
+
+    <string name="idVacuna">ID Vacuna</string>
+    <string name="nombreVacuna">Nombre de Vacuna</string>
+    <string name="fechaAplicacion">Fecha de aplicación</string>
+    <string name="aplicado">Aplicada?</string>
+
 </resources>

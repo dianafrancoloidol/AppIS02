@@ -86,13 +86,24 @@
         android:stretchColumns="*">
 
         <TableRow
+            android:id="@+id/tabla_hijos_row"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent">
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:padding="4dp"
+                android:padding="5dp"
+                android:background="#969696"
+                android:text="@string/idHijo"
+                android:textAlignment="center"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
                 android:background="#969696"
                 android:text="@string/cedula"
                 android:textAlignment="center"
@@ -139,15 +150,6 @@
                 android:textColor="#FFFFFF"
                 android:textSize="12sp" />
 
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:background="#969696"
-                android:text="@string/alergia"
-                android:textAlignment="center"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp" />
         </TableRow>
     </TableLayout>
 </LinearLayout>

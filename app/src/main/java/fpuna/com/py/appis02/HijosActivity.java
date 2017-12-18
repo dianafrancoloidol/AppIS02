@@ -1,11 +1,16 @@
 package fpuna.com.py.appis02;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -51,16 +56,19 @@ public class HijosActivity extends AppCompatActivity implements View.OnClickList
     private static final int REQ_CODE = 9001;
 
     private RecuperarHijos recuperarHijos = null;
-    private String resultado = "";
+    private RecuperarVacunaciones recuperarVacunaciones = null;
+    private String resultado, resultadoVac = "";
     private int pUsuarioId = 0;
+    private int pHijoId = 0;
     private TableLayout tablaHijos;
-    JSONArray jsonArray;
+    JSONArray jsonArray, jsonArrayVac;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hijos);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         //Prof_Section = (LinearLayout)findViewById(R.id.prof_section);
         SignOut = (Button)findViewById(R.id.btn_logout_);
@@ -79,6 +87,7 @@ public class HijosActivity extends AppCompatActivity implements View.OnClickList
         tablaHijos = (TableLayout) findViewById(R.id.tabla_hijos);
         recuperarHijos = new RecuperarHijos();
         recuperarHijos.execute();
+
     }
 
     protected void cargarTablaHijos(){
@@ -101,7 +110,35 @@ public class HijosActivity extends AppCompatActivity implements View.OnClickList
                     tr.setLayoutParams(new TableLayout.LayoutParams(
                             TableRow.LayoutParams.FILL_PARENT,
                             TableRow.LayoutParams.WRAP_CONTENT));
+                    tr.setOnClickListener( new View.OnClickListener() {
+                        @Override
+                        public void onClick( View v ) {
+                            TableRow t = (TableRow) v;
+                            TextView firstTextView = (TextView) t.getChildAt(0);
+                            TextView secondTextView = (TextView) t.getChildAt(1);
+                            TextView thirdTextView = (TextView) t.getChildAt(2);
+                            TextView forthTextView = (TextView) t.getChildAt(3);
+                            Integer firstText = Integer.parseInt(firstTextView.getText().toString());
+                            String secondText = secondTextView.getText().toString();
+                            String thirdText = thirdTextView.getText().toString();
+                            String forthText = forthTextView.getText().toString();
+                            //Toast.makeText(getApplicationContext() , "clic en row "+ firstText, Toast.LENGTH_LONG).show();
+
+                            Intent in = new Intent(HijosActivity.this,VacunasActivity.class);
+                            int idHijo = 0;
+                            in.putExtra("hijoId", firstText);
+                            in.putExtra("nombre", thirdText + " " + forthText);
+                            in.putExtra("cedula", secondText);
+                            startActivity(in);
+                        }
+                    } );
                     //Create columns to add as table data
+                    TextView textId = new TextView(this);
+                    textId.setId(200+count);
+                    textId.setText(json.getString("idHijo"));
+                    textId.setPadding(2, 0, 5, 0);
+                    textId.setTextColor(Color.BLACK);
+                    tr.addView(textId);
                     // Create a TextView to add date
                     TextView textCedula = new TextView(this);
                     textCedula.setId(200+count);
@@ -142,12 +179,6 @@ public class HijosActivity extends AppCompatActivity implements View.OnClickList
                     textSexo.setTextColor(Color.BLACK);
                     tr.addView(textSexo);
 
-                    TextView textAlergia = new TextView(this);
-                    textAlergia.setId(200+count);
-                    textAlergia.setText(json.getString("alergia"));
-                    textAlergia.setPadding(2, 0, 5, 0);
-                    textAlergia.setTextColor(Color.BLACK);
-                    tr.addView(textAlergia);
                     // finally add this to the table row
                     tablaHijos.addView(tr, new TableLayout.LayoutParams(
                             TableRow.LayoutParams.FILL_PARENT,
@@ -185,6 +216,80 @@ public class HijosActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
+    private void mostrarNotificacion() {
+        if(jsonArray.length() != 0){
+            for (int i=0; i<jsonArray.length(); i++){
+                try {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    pHijoId = Integer.parseInt(json.getString("idHijo"));
+                    recuperarVacunaciones = new RecuperarVacunaciones();
+                    recuperarVacunaciones.execute();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void notificarVacuna(){
+        Integer firstText = 0;
+        String notificaciones_detalle = "", secondText = "", thirdText = "", forthText = "";
+        if(jsonArrayVac.length() != 0){
+            Date hoy = new Date();
+            for (int i=0; i<jsonArrayVac.length(); i++){
+                try {
+                    JSONObject json = jsonArrayVac.getJSONObject(i);
+                    JSONObject jsonVacuna = json.getJSONObject("idVacuna");
+                    JSONObject jsonHijo = json.getJSONObject("idHijo");
+
+                    SimpleDateFormat parseador = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat formateador = new SimpleDateFormat("dd/MM/yyyy");
+
+                    Date fecha_vac = parseador.parse(json.getString("fecha"));
+                    if(json.getInt("estado") == 0 && hoy.getYear() == fecha_vac.getYear() && hoy.getMonth() == fecha_vac.getMonth() && (hoy.getDate()+2) >= fecha_vac.getDate()){
+                        firstText = jsonHijo.getInt("idHijo");
+                        secondText = jsonHijo.getString("cedula");
+                        thirdText = jsonHijo.getString("nombre");
+                        forthText = jsonHijo.getString("apellido");
+                        notificaciones_detalle = notificaciones_detalle + "Su hijo " + jsonHijo.getString("nombre") + " " + jsonHijo.getString("apellido") + " debe vacunarse contra la " + jsonVacuna.getString("nombre") + " en fecha " +formateador.format(fecha_vac) + "\n";
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(!notificaciones_detalle.equals("")){
+                NotificationCompat.Builder builder =
+                        new NotificationCompat.Builder(this)
+                                .setSmallIcon(R.mipmap.ic_launcher)
+                                .setLargeIcon((((BitmapDrawable)getResources()
+                                        .getDrawable(R.mipmap.ic_launcher)).getBitmap()))
+                                .setContentTitle("Aviso de vacunación")
+                                .setContentText(notificaciones_detalle)
+                                .setTicker("Aviso de vacunación");
+
+                Intent notificationIntent = new Intent(this, VacunasActivity.class);
+                notificationIntent.putExtra("hijoId", firstText);
+                notificationIntent.putExtra("nombre", thirdText + " " + forthText);
+                notificationIntent.putExtra("cedula", secondText);
+                PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+                builder.setContentIntent(contentIntent);
+
+                // Add as notification
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                manager.cancelAll();
+                manager.notify(0, builder.build());
+
+            }
+
+        }
+
+    }
+
     private class RecuperarHijos extends AsyncTask<Void, Void, Boolean> {
 
         @Override
@@ -208,12 +313,13 @@ public class HijosActivity extends AppCompatActivity implements View.OnClickList
             }
             else{
                 try {
-                    jsonArray = new JSONArray(resultado);
+                        jsonArray = new JSONArray(resultado);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 cargarTablaHijos();
+                mostrarNotificacion();
             }
         }
 
@@ -223,4 +329,41 @@ public class HijosActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    private class RecuperarVacunaciones extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost post = new HttpPost("http://10.0.2.2:8080/AppRestIS2WS/services/registros/consultar_por_hijo/"+pHijoId);
+            try {
+
+                HttpResponse resp = httpClient.execute(post);
+                resultadoVac = EntityUtils.toString(resp.getEntity());
+            }catch (Exception ex){
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if(!success){
+
+            }
+            else{
+                try {
+                    jsonArrayVac = new JSONArray(resultadoVac);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                notificarVacuna();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
+        }
+    }
 }
